@@ -334,6 +334,10 @@ const possibleFrontendPaths = [
 ];
 const frontendDir = possibleFrontendPaths.find((p) => fs.existsSync(p)) || possibleFrontendPaths[0];
 app.use(express.static(frontendDir));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) return next();
+  res.sendFile(path.join(frontendDir, 'index.html'));
+});
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;
