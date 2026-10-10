@@ -1,0 +1,14 @@
+logging:
+  receivers:
+    finsight_app:
+      type: files
+      include_paths:
+        - /var/log/finsight/app.log
+    nginx_access:
+      type: nginx_access
+    nginx_error:
+      type: nginx_error
+  service:
+    pipelines:
+      finsight:
+        receivers: [finsight_app, nginx_access, nginx_error]
