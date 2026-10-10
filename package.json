@@ -1,15 +1,13 @@
 {
-  "name": "finsight-backend",
-  "version": "1.0.0",
-  "description": "FinSight API - Express + Cloud Firestore",
-  "main": "server.js",
+  "name": "finsight",
+  "version": "1.1.0",
+  "description": "FinSight: Financial Health & Proactive Cash-Flow Planner",
   "scripts": {
-    "start": "node server.js",
-    "dev": "USE_MEMORY=1 node server.js"
+    "start": "node backend/server.js",
+    "dev": "USE_MEMORY=1 node backend/server.js",
+    "test": "node --test backend/test/*.test.js"
   },
-  "engines": { "node": ">=18" },
-  "dependencies": {
-    "@google-cloud/firestore": "^7.9.0",
-    "express": "^4.19.2"
+  "engines": {
+    "node": ">=18"
   }
 }

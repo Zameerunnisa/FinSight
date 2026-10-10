@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinSight - Financial Health &amp; Cash-Flow Planner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo-icon">&#8377;</div>
+      <div>
+        <h1>FinSight</h1>
+        <p class="tagline">Where might my money go next, and what can I change before it happens?</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="export-csv-btn" class="secondary" title="Download your transaction records as CSV">&#128190; Export CSV</button>
+      <label class="button-label secondary" title="Import transactions from a CSV file">
+        &#128194; Import CSV
+        <input type="file" id="import-csv-input" accept=".csv" style="display:none">
+      </label>
+      <button id="seed-btn" class="primary">&#10227; Load demo data</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="message" class="message" hidden></div>
+    <div id="warning" class="banner"></div>
+
+    <!-- Key Metrics & Health Score -->
+    <section id="stats" class="stats"></section>
+
+    <!-- Balance Forecast Chart with Confidence Band -->
+    <section class="card chart-card">
+      <div class="row-between">
+        <div>
+          <h2>Cash-Flow Forecast &amp; Liquidity Corridor</h2>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-color line-base"></span> Projected Baseline</span>
+            <span class="legend-item"><span class="legend-color line-corridor"></span> Corridor (Optimistic &plusmn; Stressed)</span>
+            <span class="legend-item"><span class="legend-color line-reserve"></span> Safety Reserve</span>
+          </div>
+        </div>
+        <div class="tabs" id="range-tabs">
+          <button data-range="7">7 days</button>
+          <button data-range="30" class="active">30 days</button>
+          <button data-range="60">60 days</button>
+        </div>
+      </div>
+
+      <div class="chart-wrapper">
+        <svg id="chart" viewBox="0 0 700 290" role="img" aria-label="Forecast chart"></svg>
+        <div id="chart-tooltip" class="chart-tooltip" hidden></div>
+      </div>
+      <p class="hint">Hover over points to inspect expected balance and date details. Forecast includes baseline everyday spending and scheduled commitments.</p>
+    </section>
+
+    <!-- Category Spending Analytics -->
+    <section class="card">
+      <div class="row-between">
+        <h2>30-Day Spending Breakdown by Category</h2>
+        <span id="category-total" class="meta-tag">Total: &#8377;0</span>
+      </div>
+      <div id="category-list" class="category-bars"></div>
+    </section>
+
+    <!-- What-If Simulator -->
+    <section class="card">
+      <h2>What-If Decision Simulator</h2>
+      <p class="hint">Test a major purchase, surprise repair, or delayed income before making commitments (60-day impact projection).</p>
+      <form id="whatif-form" class="grid">
+        <label>Purchase amount (&#8377;)<input type="number" id="wi-purchase" min="0" step="1" value="40000"></label>
+        <label>Purchase in (days)<input type="number" id="wi-purchase-day" min="0" max="60" step="1" value="3"></label>
+        <label>Surprise expense (&#8377;)<input type="number" id="wi-extra" min="0" step="1" value="0"></label>
+        <label>Surprise expense in (days)<input type="number" id="wi-extra-day" min="0" max="60" step="1" value="10"></label>
+        <label>Salary delayed by (days)<input type="number" id="wi-delay" min="0" max="60" step="1" value="0"></label>
+        <div class="actions"><button type="submit" class="primary">Run simulation</button></div>
+      </form>
+      <div id="whatif-result" hidden>
+        <div id="verdict" class="banner"></div>
+        <div class="chart-wrapper">
+          <svg id="chart2" viewBox="0 0 700 290" role="img" aria-label="Before and after comparison chart"></svg>
+          <div id="chart2-tooltip" class="chart-tooltip" hidden></div>
+        </div>
+        <table id="compare"></table>
+        <div class="actions mt-2"><button id="save-scenario" class="secondary">&#128190; Save this scenario</button></div>
+      </div>
+      <h3>Saved Decision Scenarios</h3>
+      <ul id="scenario-list" class="list"></ul>
+    </section>
+
+    <!-- Settings -->
+    <section class="card">
+      <h2>Account Settings &amp; Safety Thresholds</h2>
+      <form id="settings-form" class="grid">
+        <label>Opening liquid balance (&#8377;)<input type="number" id="set-opening" step="1" required></label>
+        <label>Emergency reserve buffer to maintain (&#8377;)<input type="number" id="set-reserve" min="0" step="1" required></label>
+        <div class="actions"><button type="submit" class="secondary">Save settings</button></div>
+      </form>
+    </section>
+
+    <!-- Two Columns: Everyday Logging & Scheduled Obligations -->
+    <div class="two-col">
+      <section class="card">
+        <h2>Everyday Spending &amp; Income</h2>
+        <form id="tx-form" class="grid">
+          <label>Type
+            <select id="tx-type"><option value="expense">Expense</option><option value="income">Income</option></select>
+          </label>
+          <label>Amount (&#8377;)<input type="number" id="tx-amount" min="1" step="1" required></label>
+          <label>Date<input type="date" id="tx-date" required></label>
+          <label>Category<input type="text" id="tx-category" maxlength="40" placeholder="Groceries, Dining, Transit..."></label>
+          <label class="wide">Note / Description<input type="text" id="tx-note" maxlength="80" placeholder="Optional details"></label>
+          <div class="actions"><button type="submit" class="primary">Log entry</button></div>
+        </form>
+        <ul id="tx-list" class="list"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Scheduled Bills &amp; Regular Income</h2>
+        <form id="sch-form" class="grid">
+          <label>Item Name<input type="text" id="sch-name" maxlength="60" required placeholder="Rent, Salary, Gym..."></label>
+          <label>Type
+            <select id="sch-type"><option value="expense">Bill / Obligation</option><option value="income">Income / Inflow</option></select>
+          </label>
+          <label>Amount (&#8377;)<input type="number" id="sch-amount" min="1" step="1" required></label>
+          <label>First due date<input type="date" id="sch-date" required></label>
+          <label>Recurrence Frequency
+            <select id="sch-repeat">
+              <option value="monthly">Monthly</option>
+              <option value="biweekly">Bi-weekly (Every 2 weeks)</option>
+              <option value="weekly">Weekly</option>
+              <option value="quarterly">Quarterly (Every 3 months)</option>
+              <option value="yearly">Yearly (Annual)</option>
+              <option value="none">One time</option>
+            </select>
+          </label>
+          <div class="actions"><button type="submit" class="primary">Schedule item</button></div>
+        </form>
+        <ul id="sch-list" class="list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>FinSight Platform &bull; Predictive Cash-Flow &bull; Synthetic Demo Mode</p>
+  </footer>
+
+  <script src="forecast.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
